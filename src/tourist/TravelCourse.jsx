@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import '../css/tourist.scss';
 
 // 지역 및 해시태그 필터 옵션
 const regionOptions = [
@@ -46,15 +48,17 @@ function getHashtag(category) {
     }
 }
 
-const TravelSearch = () => {
+const TravelCourse = () => {
     const [searchKeyword, setSearchKeyword] = useState('');
     const [regionFilter, setRegionFilter] = useState('');
     const [hashtagFilter, setHashtagFilter] = useState('');
-    const [courseData, setCourseData] = useState([]); // 초기값을 빈 배열로 설정
+    const [courseData, setCourseData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [loading, setLoading] = useState(false); // 로딩 상태 추가
     const pageSize = 10;  // 페이지당 항목 수
+
+    const navigate = useNavigate();
 
     const regionMap = {
         "1": "서울",
@@ -107,6 +111,23 @@ const TravelSearch = () => {
             .catch((error) => {
                 console.error('Error fetching courses:', error);
                 setLoading(false); // 에러가 나도 로딩 상태 false로 설정
+            });
+    };
+
+    // 여행 코스 클릭시 상세 페이지로 데이터 전달
+    const handleCourseClick = (contentId) => {
+        setLoading(true); // 로딩 시작
+        axios.get(`http://localhost:9000/travelcourse-info?id=${contentId}`)
+            .then((response) => {
+                
+                const courseDetail = response.data;
+                
+                navigate('/travelcourse-info', { state: { courseDetail } }); // 데이터와 함께 이동
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.error('Error fetching course info:', error);
+                setLoading(false);
             });
     };
 
@@ -166,24 +187,24 @@ const TravelSearch = () => {
     // 페이지 버튼 누를 시 페이지 변경 처리 함수 (axios 다시 요청)
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);  // 페이지 상태 변경
-        handleSearch();
     };
 
     // 최초 로딩 시에는 데이터를 요청하지 않고 검색 버튼을 누를 때만 요청
     useEffect(() => {
         handleSearch();
-    }, []);
+    }, [currentPage]);
 
     const totalPages = Math.ceil(totalCount / pageSize);
 
     return (
-        <div>
-            <h1>여행 코스 검색</h1>
+        <div className="tourist-wrapper">
+            <h1 className="tourist-header">여행 코스 검색</h1>
 
             {/* 지역 필터 */}
             <select
                 value={regionFilter}
                 onChange={(e) => setRegionFilter(e.target.value)}
+                className="filter-select"
             >
                 {regionOptions.map((region) => (
                     <option key={region.value} value={region.value}>
@@ -196,6 +217,7 @@ const TravelSearch = () => {
             <select
                 value={hashtagFilter}
                 onChange={(e) => setHashtagFilter(e.target.value)}
+                className="filter-select"
             >
                 {hashtagOptions.map((hashtag) => (
                     <option key={hashtag.value} value={hashtag.value}>
@@ -210,34 +232,54 @@ const TravelSearch = () => {
                 placeholder="검색어를 입력하세요"
                 value={searchKeyword}
                 onChange={(e) => setSearchKeyword(e.target.value)}
+                className="search-input"
             />
-            <button onClick={handleSearch}>검색</button>
+            <button onClick={handleSearch} className="search-button">검색</button>
+
+            <div className="total-check">
+                <p className="total-count">총 {totalCount}개 코스</p>
+                <select className="sort-select">
+                    <option>제목순</option>
+                    <option>수정일순</option>
+                    <option>생성일순</option>
+                </select>
+            </div>
 
             {/* 로딩 상태 처리 */}
             {loading ? (
-                <div>로딩 중...</div>
+                <div className="loading-message">로딩 중...</div>
             ) : (
                 <>
-                    <div>
-                        총 {totalCount}개 코스
-                    </div>
-
                     {/* 데이터가 비어있을 때 "결과가 없습니다" 메시지 */}
                     {courseData.length === 0 ? (
-                        <div>결과가 없습니다.</div>
+                        <div className="no-results">결과가 없습니다.</div>
                     ) : (
-                        <div>
+                        <div className="travel-course-list-content">
                             {courseData.map((course) => {
                                 const regionName = regionMap[course.areacode] || '알 수 없음';
                                 const hashtag = getHashtag(course.cat2); // 해시태그 가져오기
-                                
+
                                 return (
-                                    <div key={course.contentid}>
-                                        <img src={course.firstimage || 'https://example.com/default-image.jpg'} alt={course.title} />
-                                        <h4>{course.title}</h4>
-                                        <p>{regionName}</p>
-                                        <p>{hashtag}</p> {/* 해시태그 표시 */}
+                                    <div key={course.contentid} className="travel-course-list" onClick={() => handleCourseClick(course.contentid)}>
+                                        {/* <Link to={`/travelcourse-info?id=${course.contentid}`}> */}
+                                            {/* course.firstimage가 존재하는 경우에만 이미지 렌더링 */}
+                                            {course.firstimage && (
+                                                <img
+                                                    src={course.firstimage}
+                                                    alt={course.title}
+                                                    className="travel-course-list__img"
+                                                />
+                                            )}
+                                            <h4 className="course-title">{course.title}</h4>
+                                            <div className="course-box">
+                                                {/* 지역 */}
+                                                <p className="course-region">{regionName}</p>
+                                                {/* 코스 태그 */}
+                                                <p className="course-hashtag">{hashtag}</p>
+                                            </div>
+                                        {/* </Link> */}
                                     </div>
+
                                 );
                             })}
                         </div>
@@ -250,7 +292,8 @@ const TravelSearch = () => {
                 </>
             )}
         </div>
+
     );
 };
 
-export default TravelSearch;
+export default TravelCourse;

@@ -1,12 +1,21 @@
 import logo from './logo.svg';
-import './App.css';
-import TravelSearch from './tourist/tourist.jsx'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-function App() {
+import TravelCourse from './tourist/TravelCourse.jsx';
+import TravelCourseInfo from './tourist/TravelCourseInfo.jsx';
+
+const App = () => {
   return (
-    <div className="App">
-      <TravelSearch />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/travelcourse" element={< TravelCourse />}></Route>
+        <Route path="/travelcourse-info" element={< TravelCourseInfo />}></Route>
+      </Routes>
+
+    </Router>
+
+
   );
 }
 
