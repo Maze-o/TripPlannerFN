@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
-import ReactDOMServer from 'react-dom/server';
 import '../css/TravelCourseInfo.scss';
 
 // Swiper 
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
-
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Navigation } from 'swiper/modules';
 
@@ -17,17 +15,86 @@ const TravelCourseInfo = () => {
     const { courseDetail } = location.state || {}; // state에서 데이터 가져오기
 
     const [detailCommon, setDetailCommon] = useState(null);
+    const [detailIntro, setDetailIntro] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [keywordResults, setKeywordResults] = useState([]); // 검색 결과 상태 추가
+    const [keywordResults, setKeywordResults] = useState([]); // 검색 결과 상태
     const [googleResult, setGoogleResult] = useState([]);
 
     const encodeUTF8 = (keyword) => encodeURIComponent(keyword.trim());
 
     // useEffect는 courseDetail이 처음 로드될 때만 API를 호출하도록 설정
+    // useEffect(() => {
+    //     if (!courseDetail) return;
+
+    //     const contentId = courseDetail.items.item[0]?.contentid;
+
+    //     // 공통 API 호출
+    //     axios.get(`http://localhost:9000/travelcourse-info-detailCommon`, { params: { id: contentId } })
+    //         .then((response) => {
+    //             setDetailCommon(response.data.items.item[0]);
+    //             setLoading(false);
+    //         })
+    //         .catch(() => {
+    //             setError('데이터를 불러오는 데 실패했습니다.');
+    //             setLoading(false);
+    //         });
+
+    //     // 키워드 검색 API 호출
+    //     const keywordRequests = courseDetail.items.item.map((el) => {
+    //         const currentEncodedData = encodeUTF8(el.subname);
+    //         return axios.get(`http://localhost:9000/travelcourse-info-searchKeywordd`, { params: { keyword: currentEncodedData } })
+    //             .then((response) => ({ subname: el.subname, data: response.data.items }))
+    //             .catch(() => ({ subname: el.subname, data: null }));
+    //     });
+
+    //     Promise.all(keywordRequests).then((results) => {
+    //         setKeywordResults(results);
+    //     });
+
+    //     // 구글 검색 API 호출
+    //     const googleKeywordSearch = courseDetail.items.item.map((el, index) => {
+    //         const currentEncodedData = encodeUTF8(el.subname);
+    //         return axios.get("http://localhost:9000/google-search-places", { params: { keyword: currentEncodedData } })
+    //             .then((response) => {
+    //                 const { photoUrls, latitude, longitude } = response.data;
+    //                 // 사진 데이터가 없으면 좌표 정보도 못받아오는 거기 때문에 따로 api 요청해서 배열 채워넣음
+    //                 if (!photoUrls || photoUrls.length === 0) {
+    //                     return axios.get(`http://localhost:9000/travelcourse-info-searchKeyword`, { params: { keyword: currentEncodedData } })
+    //                         .then((backupResponse) => ({
+    //                             longitude: Number(backupResponse.data.items.item[0].mapx),
+    //                             latitude: Number(backupResponse.data.items.item[0].mapy),
+    //                             photoUrls: null
+    //                         }))
+    //                         .catch(() => ({ index, photoUrls: null, latitude, longitude }));
+    //                 }
+    //                 return { index, photoUrls, latitude, longitude };
+    //             })
+    //             .catch(() => ({ index, photoUrls: null, latitude: null, longitude: null }));
+    //     });
+
+    //     Promise.all(googleKeywordSearch)
+    //         .then((results) => {
+    //             const sortedResults = results.sort((a, b) => a.index - b.index);
+    //             setGoogleResult(sortedResults);
+    //         })
+    //         .catch((error) => {
+    //             console.error('요청 중 오류 발생: ', error);
+    //         });
+
+    //     // 상세정보 가져오는 함수
+    //     axios.get('http://localhost:9000/travelcourse-info-detailIntro', { params: { id: contentId } })
+    //         .then((response) => {
+    //             setDetailIntro(response);
+    //         })
+    //         .catch((error) => {
+    //             console.log(error);
+    //         });
+    // }, [courseDetail]); // courseDetail이 변경될 때마다 호출
+
     useEffect(() => {
-        if (!courseDetail) return; // courseDetail이 없으면 실행하지 않음
-        console.log('courseDetail : ', courseDetail);
+        if (!courseDetail) return;
+
         const contentId = courseDetail.items.item[0]?.contentid;
 
         // 공통 API 호출
@@ -41,55 +108,69 @@ const TravelCourseInfo = () => {
                 setLoading(false);
             });
 
-        // 키워드 검색 API 호출
-        const keywordRequests = courseDetail.items.item.map((el) => {
+        // 키워드를 관광지 title로 요청 보내기
+        const keywordRequests = courseDetail.items.item.map((el, index) => {
+            const currentSubcontentId = el.subcontentid;
             const currentEncodedData = encodeUTF8(el.subname);
-            return axios.get(`http://localhost:9000/travelcourse-info-searchKeywordd`, {
-                params: { keyword: currentEncodedData }
-            })
-                .then((response) => ({ subname: el.subname, data: response.data.items }))
-                .catch(() => ({ subname: el.subname, data: null }));
+            return axios.get(`http://localhost:9000/travelcourse-info-searchKeyword`, { params: { keyword: currentEncodedData } })
+                .then((response) => {
+                    console.log('response : ', response)
+                    console.log('currentSubcontentId : ',currentSubcontentId)
+                    console.log(response.data.items)
+                    const filteredData = response.data.items.item.filter((item) => item.contentid === currentSubcontentId);
+                    console.log('filteredData : ',filteredData)
+                    return { subcontentid: currentSubcontentId, data: filteredData, index };
+                })
+                .catch(() => ({ subcontentid: currentSubcontentId, data: null, index }));
         });
 
         Promise.all(keywordRequests).then((results) => {
-            console.log('keywordResults : ', results); // 결과 확인용
-            setKeywordResults(results);
+            console.log("results : ", results);
+            // 결과를 인덱스를 기준으로 정렬하여 순서를 보장합니다.
+            const sortedResults = results.sort((a, b) => a.index - b.index);
+            console.log('sortedResults:', sortedResults); // 이곳에서 `sortedResults` 확인
+
+            setKeywordResults(sortedResults);
         });
-
-
+        // 구글 검색 API 호출
         const googleKeywordSearch = courseDetail.items.item.map((el, index) => {
             const currentEncodedData = encodeUTF8(el.subname);
-
-            return axios.get("http://localhost:9000/google-search-places", {
-                params: {
-                    keyword: currentEncodedData
-                }
-            }).then((response) => {
-                console.log(`googleResponse for item ${index}: `, response.data);
-
-                const { photoUrl, latitude, longitude } = response.data; // photoUrl, latitude, longitude 받기
-
-                return { index, photoUrl, latitude, longitude }; // 사진 URL, 위도, 경도 반환
-            }).catch((error) => {
-                console.error(`구글 API 요청 중 오류 for item ${index}: `, error);
-                return { index, photoUrl: null, latitude: null, longitude: null }; // 오류 시 null 반환
-            });
+            return axios.get("http://localhost:9000/google-search-places", { params: { keyword: currentEncodedData } })
+                .then((response) => {
+                    const { photoUrls, latitude, longitude } = response.data;
+                    if (!photoUrls || photoUrls.length === 0) {
+                        return axios.get(`http://localhost:9000/travelcourse-info-searchKeyword`, { params: { keyword: currentEncodedData } })
+                            .then((backupResponse) => ({
+                                longitude: Number(backupResponse.data.items.item[0].mapx),
+                                latitude: Number(backupResponse.data.items.item[0].mapy),
+                                photoUrls: null
+                            }))
+                            .catch(() => ({ index, photoUrls: null, latitude, longitude }));
+                    }
+                    return { index, photoUrls, latitude, longitude };
+                })
+                .catch(() => ({ index, photoUrls: null, latitude: null, longitude: null }));
         });
 
-        // Promise.all로 모든 요청이 끝나기를 기다린 후
         Promise.all(googleKeywordSearch)
             .then((results) => {
-                // 인덱스를 기준으로 결과를 정렬
                 const sortedResults = results.sort((a, b) => a.index - b.index);
-                setGoogleResult(sortedResults); // 사진 URL, 위도, 경도 포함한 결과 저장
+                setGoogleResult(sortedResults);
             })
             .catch((error) => {
                 console.error('요청 중 오류 발생: ', error);
             });
 
+        // 상세정보 가져오는 함수
+        axios.get('http://localhost:9000/travelcourse-info-detailIntro', { params: { id: contentId } })
+            .then((response) => {
+                setDetailIntro(response);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
 
-
-    }, []); // 빈 배열로 설정하여 처음 한 번만 실행되도록
+    }, [courseDetail]);
 
     if (loading) return <p>로딩 중...</p>;
     if (error) return <p>{error}</p>;
@@ -100,125 +181,165 @@ const TravelCourseInfo = () => {
     return (
         <div className="TravelCourseInfo-wrapper">
             <h3>{detailCommon.title} 코스 설명 - <br />{sanitizedOverview}</h3>
-            {/* keywordResults가 준비되었을 때만 MyComponent 렌더링 */}
-            {keywordResults.length > 0 && <MyComponent courseDetail={courseDetail} keywordResults={keywordResults} googleResult={googleResult} detailCommon={detailCommon} />}
+            {keywordResults.length > 0 && (
+                <MyComponent
+                    courseDetail={courseDetail}
+                    keywordResults={keywordResults}
+                    googleResult={googleResult}
+                    detailCommon={detailCommon}
+                    detailIntro={detailIntro}
+                />
+            )}
         </div>
     );
 };
 
-const MyComponent = ({ courseDetail, keywordResults, googleResult, detailCommon }) => {
-    console.log('detailCommon : ', detailCommon)
+const MyComponent = ({ courseDetail, keywordResults, googleResult, detailCommon, detailIntro }) => {
     console.log('courseDetail : ', courseDetail);
+    console.log('keywordResults : ', keywordResults);
+    console.log('googleResult : ', googleResult);
+    console.log('detailCommon : ', detailCommon);
+    console.log('detailIntro : ', detailIntro);
+
     const swiperRef = useRef(null);
+    const [totalDistance, setTotalDistance] = useState(0);
+    const [address, setAddress] = useState([]);
 
     const goToSlide = (index) => {
         if (swiperRef.current) swiperRef.current.slideTo(index);
     };
 
-    console.log('MyComponents : googleResult : ', googleResult);
     useEffect(() => {
-        if (!googleResult || googleResult.length === 0) return;
+        const getGoogleAddress = async (latitude, longitude) => {
+            const apiKey = 'AIzaSyAEae5uopEekuKilPCwWMsQS-M5JG8tTIk';
+            try {
+                const response = await axios.get(`https://maps.googleapis.com/maps/api/geocode/json`, {
+                    params: { latlng: `${latitude},${longitude}`, key: apiKey },
+                });
+                const results = response.data.results;
+                return results.length > 0 ? results[0].formatted_address : '주소를 찾을 수 없습니다';
+            } catch (error) {
+                console.error('주소 가져오기 실패:', error);
+                return null;
+            }
+        };
+
+        const fetchAddresses = async () => {
+            const addresses = [];
+            for (const result of googleResult) {
+                if (result.latitude && result.longitude) {
+                    const address = await getGoogleAddress(result.latitude, result.longitude);
+                    addresses.push(address);
+                } else {
+                    addresses.push(null);
+                }
+            }
+            setAddress(addresses);
+        };
+
+        if (googleResult.length > 0) fetchAddresses();
 
         if (window.kakao && window.kakao.maps) {
             const container = document.getElementById('main-map');
             const bounds = new window.kakao.maps.LatLngBounds();
+            const options = { center: new window.kakao.maps.LatLng(googleResult[0]?.latitude, googleResult[0]?.longitude), level: 5 };
+            const map = new window.kakao.maps.Map(container, options);
+            const positions = [];
+            let calculatedDistance = 0;
 
-            const options = {
-                center: new window.kakao.maps.LatLng(googleResult[0]?.latitude, googleResult[0]?.longitude),
-                level: 5,
+            const getDistance = (lat1, lon1, lat2, lon2) => {
+                const R = 6371e3;
+                const toRad = (value) => (value * Math.PI) / 180;
+
+                const φ1 = toRad(lat1);
+                const φ2 = toRad(lat2);
+                const Δφ = toRad(lat2 - lat1);
+                const Δλ = toRad(lon2 - lon1);
+
+                const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+                    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+                return R * c;
             };
 
-            const map = new window.kakao.maps.Map(container, options);
-
             googleResult.forEach((result, index) => {
-                console.log('result : ', result);
                 if (result.latitude && result.longitude) {
                     const position = new window.kakao.maps.LatLng(result.latitude, result.longitude);
                     bounds.extend(position);
+                    positions.push(position);
 
-                    // 1. 기본 마커 생성
-                    const marker = new window.kakao.maps.Marker({
-                        position,
-                        map,
-                    });
-                    marker.setOpacity(0); // 마커를 투명하게 설정
-
-                    // 2. 커스텀 오버레이 생성 (div)
+                    const marker = new window.kakao.maps.Marker({ position, map });
                     const customOverlayContent = `
-                        <div 
-                            style="position: absolute; left: -15px; top: -40px; 
-                                   padding: 5px; font-size: 16px; font-weight: bold; 
-                                   background-color: white; border-radius: 50%; 
-                                   width: 30px; height: 30px; display: flex; 
-                                   justify-content: center; align-items: center; 
-                                   border: 2px solid #000; cursor: pointer; z-index: 100;">
-                                   ${index + 1}
-                                   </div>
-                                   `;
-                    //    onMouseOver="showInfoWindow(${index}, ${result.latitude}, ${result.longitude}, '${index + 1}번')"
-                    //    onMouseOut="hideInfoWindow()">
-
+                        <div style="position: absolute; left: -15px; top: -40px;
+                            padding: 5px; font-size: 16px; font-weight: bold;
+                            background-color: white; border-radius: 50%;
+                            width: 30px; height: 30px; display: flex;
+                            justify-content: center; align-items: center;
+                            border: 2px solid blue; cursor: pointer; z-index: 100;">
+                            ${index + 1}
+                        </div>
+                    `;
                     const customOverlay = new window.kakao.maps.CustomOverlay({
-                        position,
-                        content: customOverlayContent,
-                        clickable: true,
+                        position, content: customOverlayContent, clickable: true
                     });
-
-                    // 3. 커스텀 오버레이를 맵에 추가
                     customOverlay.setMap(map);
 
-                    // 4. 인포윈도우를 생성
                     const infowindow = new window.kakao.maps.InfoWindow({
-                        content: `<div style="padding:5px; font-size:12px;">${keywordResults[index].subname}</div>`,
+                        content: `<div style="padding:5px; font-size:12px;">${keywordResults[index].subname}</div>`
                     });
-
-                    // 5. 인포윈도우를 항상 열리게 설정
                     infowindow.open(map, marker);
                 }
             });
 
-            // 지도 범위 설정
+            const polyline = new window.kakao.maps.Polyline({
+                path: positions, strokeWeight: 5, strokeColor: '#FF0000', strokeOpacity: 0.7, strokeStyle: 'solid',
+            });
+            polyline.setMap(map);
+
+            for (let i = 0; i < positions.length - 1; i++) {
+                const lat1 = positions[i].getLat();
+                const lon1 = positions[i].getLng();
+                const lat2 = positions[i + 1].getLat();
+                const lon2 = positions[i + 1].getLng();
+                calculatedDistance += getDistance(lat1, lon1, lat2, lon2);
+            }
+
+            setTotalDistance(calculatedDistance);
             map.setBounds(bounds);
         }
     }, [googleResult]);
 
-
-
-
-
-
+    const sanitizeText = (text) => {
+        const doc = new DOMParser().parseFromString(text, 'text/html');
+        return doc.body.textContent || "";
+    };
 
     return (
         <>
+            <div>
+                <strong>코스 총 거리:</strong> {(totalDistance / 1000).toFixed(2)} km
+            </div>
             {detailCommon.homepage && (
                 <div>
-                    <a
-                        href={detailCommon.homepage.match(/href="(.*?)"/)?.[1]}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        style={{ textDecoration: 'none', color: 'blue' }}
-                    >
+                    <a href={detailCommon.homepage.match(/href="(.*?)"/)?.[1]}
+                        target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'blue' }}>
                         홈페이지 바로가기
                     </a>
                 </div>
             )}
-
             <div>
                 <div id="main-map" style={{ width: '1200px', height: '400px' }}></div>
-
             </div>
+
             <ul className="Course-list-Numbox">
                 {keywordResults.map((subItem, index) => (
                     <li key={index} onClick={() => goToSlide(index)}>
                         <em>{index + 1}</em>
                         <div>
-                            {subItem?.data?.item[0]?.firstimage ? (
+                            {googleResult[index]?.photoUrls ? (
                                 <div>
-                                    <img
-                                        src={subItem.data.item[0].firstimage}
-                                        alt={`Slide ${index + 1}`}
-                                        style={{ width: '120px', height: '120px' }}
-                                    />
+                                    <img src={googleResult[index].photoUrls[0]} alt={`Google Image ${index}`} style={{ width: '100px', height: '100px' }} />
                                     <span>{subItem.subname}</span>
                                 </div>
                             ) : (
@@ -229,30 +350,23 @@ const MyComponent = ({ courseDetail, keywordResults, googleResult, detailCommon 
                 ))}
             </ul>
 
-            {/* Swiper 슬라이드 */}
-            <Swiper
-                pagination={{ type: 'progressbar' }}
-                navigation={true}
-                onSwiper={(swiper) => (swiperRef.current = swiper)}
-                modules={[Pagination, Navigation]}
-                className="mySwiper"
-            >
+            <Swiper pagination={{ type: 'progressbar' }} navigation={true} onSwiper={(swiper) => (swiperRef.current = swiper)} modules={[Pagination, Navigation]}>
                 {keywordResults.map((subItem, index) => (
                     <SwiperSlide key={index}>
                         <div>
                             <h2>{subItem.subname}</h2>
-                            {/* 구글 이미지 표시 */}
-                            {googleResult[index]?.photoUrl ? (
-                                <div>
-                                    <img src={googleResult[index].photoUrl} alt={`Google Image ${index}`} />
+                            {googleResult[index]?.photoUrls && googleResult[index]?.photoUrls.length > 0 ? (
+                                <div className="photo-container">
+                                    {googleResult[index].photoUrls.map((photo, i) => (
+                                        <img key={i} src={photo} alt={`Google Image ${index}-${i}`} style={{ width: '100px', height: '100px', marginRight: '5px' }} />
+                                    ))}
+                                    <span>{subItem.subname}</span>
                                 </div>
                             ) : (
                                 <span>{subItem.subname}</span>
                             )}
-
-
-                            {/* 상세 내용 */}
-                            <span>{courseDetail.items.item[index]?.subdetailoverview}</span>
+                            <div>주소 : {address[index]}</div>
+                            <span>{sanitizeText(courseDetail.items.item[index]?.subdetailoverview)}</span>
                         </div>
                     </SwiperSlide>
                 ))}

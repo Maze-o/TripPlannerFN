@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import '../css/tourist.scss';
+import '../css/TravelCourse.scss';
 
 // 지역 및 해시태그 필터 옵션
 const regionOptions = [
@@ -55,6 +55,7 @@ const TravelCourse = () => {
     const [courseData, setCourseData] = useState([]);
     const [totalCount, setTotalCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
+    const [arrange, setArrange] = useState('');
     const [loading, setLoading] = useState(false); // 로딩 상태 추가
     const pageSize = 10;  // 페이지당 항목 수
 
@@ -94,6 +95,7 @@ const TravelCourse = () => {
             pageNo: currentPage,
             hashtag: hashtagFilter,
             regionCode: regionFilter,
+            arrange: arrange
         };
 
         axios.post('http://localhost:9000/api/getSearchKeyword', data, {
@@ -119,9 +121,9 @@ const TravelCourse = () => {
         setLoading(true); // 로딩 시작
         axios.get(`http://localhost:9000/travelcourse-info?id=${contentId}`)
             .then((response) => {
-                
+
                 const courseDetail = response.data;
-                
+
                 navigate('/travelcourse-info', { state: { courseDetail } }); // 데이터와 함께 이동
                 setLoading(false);
             })
@@ -192,7 +194,7 @@ const TravelCourse = () => {
     // 최초 로딩 시에는 데이터를 요청하지 않고 검색 버튼을 누를 때만 요청
     useEffect(() => {
         handleSearch();
-    }, [currentPage]);
+    }, [currentPage, arrange]);
 
     const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -238,11 +240,17 @@ const TravelCourse = () => {
 
             <div className="total-check">
                 <p className="total-count">총 {totalCount}개 코스</p>
-                <select className="sort-select">
-                    <option>제목순</option>
-                    <option>수정일순</option>
-                    <option>생성일순</option>
+                <select
+                    className="sort-select"
+                    value={arrange}
+                    onChange={(e) => setArrange(e.target.value)} // 상태만 업데이트
+                >
+                    <option value="">정렬선택</option>
+                    <option value="O">제목순</option>
+                    <option value="Q">수정일순</option>
+                    <option value="R">생성일순</option>
                 </select>
+
             </div>
 
             {/* 로딩 상태 처리 */}
@@ -262,21 +270,21 @@ const TravelCourse = () => {
                                 return (
                                     <div key={course.contentid} className="travel-course-list" onClick={() => handleCourseClick(course.contentid)}>
                                         {/* <Link to={`/travelcourse-info?id=${course.contentid}`}> */}
-                                            {/* course.firstimage가 존재하는 경우에만 이미지 렌더링 */}
-                                            {course.firstimage && (
-                                                <img
-                                                    src={course.firstimage}
-                                                    alt={course.title}
-                                                    className="travel-course-list__img"
-                                                />
-                                            )}
-                                            <h4 className="course-title">{course.title}</h4>
-                                            <div className="course-box">
-                                                {/* 지역 */}
-                                                <p className="course-region">{regionName}</p>
-                                                {/* 코스 태그 */}
-                                                <p className="course-hashtag">{hashtag}</p>
-                                            </div>
+                                        {/* course.firstimage가 존재하는 경우에만 이미지 렌더링 */}
+                                        {course.firstimage && (
+                                            <img
+                                                src={course.firstimage}
+                                                alt={course.title}
+                                                className="travel-course-list__img"
+                                            />
+                                        )}
+                                        <h4 className="course-title">{course.title}</h4>
+                                        <div className="course-box">
+                                            {/* 지역 */}
+                                            <p className="course-region">{regionName}</p>
+                                            {/* 코스 태그 */}
+                                            <p className="course-hashtag">{hashtag}</p>
+                                        </div>
                                         {/* </Link> */}
                                     </div>
 
