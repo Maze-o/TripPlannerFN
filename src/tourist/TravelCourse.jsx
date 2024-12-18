@@ -49,6 +49,8 @@ function getHashtag(category) {
 }
 
 const TravelCourse = () => {
+    // 관광지 코스 검색이기 때문에 값 고정
+    const contentTypeId = 25;
     const [searchKeyword, setSearchKeyword] = useState('');
     const [regionFilter, setRegionFilter] = useState('');
     const [hashtagFilter, setHashtagFilter] = useState('');
@@ -95,10 +97,11 @@ const TravelCourse = () => {
             pageNo: currentPage,
             hashtag: hashtagFilter,
             regionCode: regionFilter,
-            arrange: arrange
+            arrange: arrange,
+            contentTypeId: contentTypeId
         };
 
-        axios.post('http://localhost:9000/api/getSearchKeyword', data, {
+        axios.post('http://localhost:9000/api/getSearch', data, {
             headers: {
                 'Content-Type': 'application/json',  // Content-Type을 JSON으로 설정
                 // 'Accept': 'application/json'
@@ -215,7 +218,7 @@ const TravelCourse = () => {
                 ))}
             </select>
 
-            {/* 해시태그 필터 */}
+            {/* 카테고리 필터 */}
             <select
                 value={hashtagFilter}
                 onChange={(e) => setHashtagFilter(e.target.value)}
@@ -228,7 +231,7 @@ const TravelCourse = () => {
                 ))}
             </select>
 
-            {/* 키워드 입력 */}
+            {/* 검색어 입력 */}
             <input
                 type="text"
                 placeholder="검색어를 입력하세요"
@@ -240,6 +243,8 @@ const TravelCourse = () => {
 
             <div className="total-check">
                 <p className="total-count">총 {totalCount}개 코스</p>
+
+                {/* 정렬 방식 */}
                 <select
                     className="sort-select"
                     value={arrange}
