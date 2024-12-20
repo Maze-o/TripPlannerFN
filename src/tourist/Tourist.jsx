@@ -13,7 +13,7 @@ const Tourist = () => {
     const [loading, setLoading] = useState(false);
     const [searchKeyword, setSearchKeyword] = useState('');
     const [totalCount, setTotalCount] = useState(0);  // totalCount를 숫자형으로 초기화
-    const [arrange, setArrange] = useState('');
+    const [arrange, setArrange] = useState('O');
     const navigate = useNavigate();
 
     // regions 객체를 사용하여 옵션을 생성
@@ -205,7 +205,6 @@ const Tourist = () => {
                     value={arrange}
                     onChange={(e) => setArrange(e.target.value)} // 상태만 업데이트
                 >
-                    <option value="">정렬선택</option>
                     <option value="O">제목순</option>
                     <option value="Q">수정일순</option>
                     <option value="R">생성일순</option>

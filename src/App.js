@@ -1,4 +1,4 @@
-import logo from './logo.svg';
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
@@ -19,7 +19,7 @@ const App = () => {
         </Link>
         <Routes>
           <Route path="/travelcourse" element={< TravelCourse />}></Route>
-          <Route path="/travelcourse-info" element={< TravelCourseInfo />}>ㅇ</Route>
+          <Route path="/travelcourse-info" element={< TravelCourseInfo />}></Route>
           <Route path="/tourist" element={<Tourist />}></Route>
           <Route path="/tourist-info" element={<TouristInfo />}></Route>
         </Routes>
