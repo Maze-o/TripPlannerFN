@@ -6,6 +6,7 @@ import TravelCourse from './tourist/TravelCourse.jsx';
 import TravelCourseInfo from './tourist/TravelCourseInfo.jsx';
 import Tourist from './tourist/Tourist.jsx';
 import TouristInfo from './tourist/TouristInfo.jsx';
+import Board from './planner/Board.jsx';
 
 const App = () => {
   return (
@@ -17,11 +18,16 @@ const App = () => {
         <Link to="/travelcourse">
           <button>추천코스</button>
         </Link>
+
+        <Link to="/planner/board"> 
+          <button>게시판</button>
+        </Link>
         <Routes>
           <Route path="/travelcourse" element={< TravelCourse />}></Route>
           <Route path="/travelcourse-info" element={< TravelCourseInfo />}></Route>
           <Route path="/tourist" element={<Tourist />}></Route>
           <Route path="/tourist-info" element={<TouristInfo />}></Route>
+          <Route path="/planner/board" element={<Board />}></Route>
         </Routes>
 
       </Router>

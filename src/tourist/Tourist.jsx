@@ -68,6 +68,7 @@ const Tourist = () => {
                 setTotalCount(Number(response.data.totalCount));  // totalCount를 숫자로 설정
                 setLoading(false); // 로딩 상태 false로 설정
             })
+            
             .catch((error) => {
                 console.error('Error fetching courses:', error);
                 setLoading(false); // 에러가 나도 로딩 상태 false로 설정
@@ -151,12 +152,13 @@ const Tourist = () => {
 
     useEffect(() => {
         handleSearch(); // 페이지가 변경되면 다시 검색
-    }, [currentPage, arrange]); // currentPage, arrange가 변경될 때마다 호출
+    }, [currentPage, arrange]); // c
+    // urrentPage, arrange가 변경될 때마다 호출
 
     const totalPages = totalCount ? Math.ceil(totalCount / 10) : 0; // 한 페이지에 10개씩 표시
 
     return (
-        <div>
+        <div className="tourist-wrapper">
             {/* 카테고리 필터 */}
             <select
                 value={categoryFilter}
@@ -185,7 +187,6 @@ const Tourist = () => {
                 ))}
             </select>
 
-            <button onClick={handleSearch} className="search-button">검색</button>
 
             {/* 검색어 입력 */}
             <input
@@ -196,6 +197,7 @@ const Tourist = () => {
                 className="search-input"
             />
 
+            <button onClick={handleSearch} className="search-button">검색</button>
             <div className="total-check">
                 <p className="total-count">총 {totalCount}개 코스</p>
 
