@@ -86,7 +86,7 @@ const Tourist = () => {
                 navigate('/tourist-info', { state: { detailCommon } }); // 데이터와 함께 이동
                 setLoading(false);
             })
-            .catch((error) => {
+            .catch((error) => { 
                 console.error('Error fetching course info:', error);
                 setLoading(false);
             });
