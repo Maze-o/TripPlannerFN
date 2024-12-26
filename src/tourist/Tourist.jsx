@@ -56,19 +56,18 @@ const Tourist = () => {
             contentTypeId: '12',  // 필요에 맞게 설정
         };
 
-        axios
-            .post('http://localhost:9000/api/getSearch', data, {
-                headers: {
-                    'Content-Type': 'application/json', // Content-Type을 JSON으로 설정
-                },
-            })
+        axios.post('http://localhost:9000/api/getSearch', data, {
+            headers: {
+                'Content-Type': 'application/json', // Content-Type을 JSON으로 설정
+            },
+        })
             .then((response) => {
                 console.log('response : ', response);
                 setTouristData(response.data.items.item || []); // 빈 배열로 안전하게 설정
                 setTotalCount(Number(response.data.totalCount));  // totalCount를 숫자로 설정
                 setLoading(false); // 로딩 상태 false로 설정
             })
-            
+
             .catch((error) => {
                 console.error('Error fetching courses:', error);
                 setLoading(false); // 에러가 나도 로딩 상태 false로 설정
@@ -86,7 +85,7 @@ const Tourist = () => {
                 navigate('/tourist-info', { state: { detailCommon } }); // 데이터와 함께 이동
                 setLoading(false);
             })
-            .catch((error) => { 
+            .catch((error) => {
                 console.error('Error fetching course info:', error);
                 setLoading(false);
             });
