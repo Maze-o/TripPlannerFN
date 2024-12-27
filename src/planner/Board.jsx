@@ -9,7 +9,17 @@ const Board = () => {
     const navigate = useNavigate();
 
     const handlePlannerClick = (plannerID) => {
-        navigate(`destination?plannerID=${plannerID}`);
+
+        // let로 선언하여 plannerItem을 변경할 수 있도록 함
+        let plannerItem = null;
+
+        // find 메서드를 사용하여 조건에 맞는 첫 번째 아이템 찾기
+        plannerItem = planners.find((item) => item.plannerID === plannerID);
+
+        console.log('dd : ', plannerItem);
+
+        // navigate(`destination/info?plannerID=${plannerID}`);
+        navigate(`destination?plannerID=${plannerID}`, { state: { plannerItem } });
     };
 
     // API 호출

@@ -1,0 +1,118 @@
+ul {
+    margin: 0;
+    padding: 0;
+}
+
+li {
+    margin: 0;
+    padding: 0;
+}
+
+p {
+    margin: 0;
+}
+
+// 여행지 코스 페이지 전체
+.destination-wrapper {
+    display: flex;
+    max-height: 100vh;
+}
+
+.destination-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.destination-content::-webkit-scrollbar-thumb {
+    background-color: #2f3542;
+    border-radius: 10px;
+}
+
+.destination-content::-webkit-scrollbar-track {
+    background-color: grey;
+    border-radius: 10px;
+    box-shadow: inset 0px 0px 5px white;
+}
+
+// 여행지 코스 페이지 컨탠츠
+.destination-content {
+    width: 30%;
+    overflow-y: auto;
+
+}
+
+.destination-card {}
+
+.destination-image {
+
+    img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+}
+
+// Day () 글씨
+.destination-day {
+    font-weight: 600;
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+
+}
+
+// 장소들 리스트
+.destination-info {
+    display: flex;
+    height: 120px;
+    margin-bottom: 20px;
+    padding: 10px 10px 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+
+    // 몇번째 인지 나타내는 숫자
+    .destination-dayOrder {
+        font-size: 1.4rem;
+        text-align: center;
+        margin: auto 0;
+        width: 40px;
+    }
+
+    .destination-desc {
+        width: 100%;
+        height: 120px;
+
+        // 카테고리
+        .destination-category {
+            width: 100%;
+        }
+
+        // 제목
+        .destination-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+        .destination-title:hover {
+            cursor: pointer;
+        }
+
+        // 주소
+        .destination-address {
+
+        }
+        
+        .destination-address:hover {
+            cursor: pointer;
+        }
+
+
+    }
+
+}
+
+// 여행지 코스 페이지 맵
+.destination-map {
+    width: 70%;
+    height: 100vh;
+}
+

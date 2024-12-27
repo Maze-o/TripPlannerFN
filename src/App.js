@@ -7,6 +7,7 @@ import TravelCourseInfo from './tourist/TravelCourseInfo.jsx';
 import Tourist from './tourist/Tourist.jsx';
 import TouristInfo from './tourist/TouristInfo.jsx';
 import Board from './planner/Board.jsx';
+import DestinationInfo from './planner/DestinationInfo.jsx';
 import Destination from './planner/Destination.jsx';
 
 const App = () => {
@@ -29,7 +30,8 @@ const App = () => {
         <Route path="/tourist" element={<Tourist />}></Route>
         <Route path="/tourist-info" element={<TouristInfo />}></Route>
         <Route path="/planner/board" element={<Board />}></Route>
-        <Route path="/planner/board/destination" element={<Destination />}></Route>
+        <Route path="/planner/board/destination" element={<Destination/>}></Route>
+        <Route path="/planner/board/destination/info" element={<DestinationInfo />}></Route>
       </Routes>
 
     </Router>
